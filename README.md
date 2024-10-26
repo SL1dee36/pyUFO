@@ -22,7 +22,7 @@
 ## Пример использования
 
 ```python
-from ufo_array_py import UFOArrayPy  # Assuming you've saved the Python code as ufo_array_py.py
+from pyufo import UFOArrayPy  # Assuming you've saved the Python code as pyufo.py
 
 ufo = UFOArrayPy("box")
 
