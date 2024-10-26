@@ -1,77 +1,69 @@
-# Документация к библиотеки `UFO`
+# Документация к библиотеке `UFO` (Python)
 
 ## Общее описание
 
-Класс `UFOArray` предназначен для хранения пар ключ-значение, организованных по классам. Он предоставляет функционал для добавления, сохранения и загрузки данных, а также извлечения элементов по имени класса. Класс поддерживает обобщённый тип, что позволяет хранить значения различных типов, предоставляемых пользователем.
+Класс `UFOArrayPy` предназначен для хранения пар ключ-значение, организованных по классам. Он предоставляет функционал для добавления, сохранения и загрузки данных в формате, совместимом с C++ версией библиотеки.  Класс реализован на Python и использует JSON для сериализации данных.
 
 ## Основные функции и методы
 
-### 1. Конструкторы
-- **UFOArray()**: Конструктор по умолчанию, инициализирующий объект класса.
+### 1. Конструктор
+- **UFOArrayPy(class_name)**: Конструктор, принимающий имя класса в качестве аргумента и инициализирующий объект.
 
-### 2. Установка имени класса
-- **setClassName(const std::string& className)**: Устанавливает имя класса для текущего объекта. Возвращает ссылку на текущий объект `UFOArray`, что позволяет использовать метод в цепочке вызовов.
+### 2. Добавление элементов
+- **add(key, value)**: Добавляет одну пару ключ-значение в текущий класс.  Возвращает ссылку на текущий объект `UFOArrayPy`, что позволяет использовать метод в цепочке вызовов.
 
-### 3. Добавление элементов
-- **add(const std::string& key, const T& value)**: Добавляет одну пару ключ-значение в текущий класс. Ключ - это строка, а значение - обобщённый тип T.
-- **add(const std::string& key, const T& value, Args... args)**: Перегруженный метод для добавления нескольких пар ключ-значение за один вызов.
+### 3. Преобразование в строку
+- **to_string()**: Возвращает строковое представление данных текущего класса в формате JSON-подобной структуры, совместимой с C++ версией.
 
-### 4. Преобразование в строку
-- **toString()**: Возвращает строковое представление данных текущего класса в формате JSON-подобной структуры.
-
-### 5. Сохранение и загрузка данных
-- **save(const std::string& filename, bool append = true)**: Сохраняет данные текущего класса в файл. Можно выбрать, добавлять ли данные в конец файла или перезаписывать его.
-- **load(const std::string& filename)**: Загружает данные из указанного файла. Очищает текущее хранилище данных перед загрузкой.
-
-### 6. Извлечение элементов
-- **getAllByClass(const std::string& className)**: Возвращает все элементы для указанного класса в виде словаря (map).
-- **getFirstByClass(const std::string& className)**: Возвращает первую пару ключ-значение для указанного класса.
-- **getLastByClass(const std::string& className)**: Возвращает последнюю пару ключ-значение для указанного класса.
-- **getByIndexAndClass(const std::string& className, size_t index)**: Возвращает элемент по индексу для указанного класса. Индексы начинаются с 0.
-
-### 7. Открытие файла
-- **openFile(const std::string& filename)**: Открывает указанный файл в приложении по умолчанию (например, в текстовом редакторе).
+### 4. Сохранение и загрузка данных
+- **save(filename, append=True)**: Сохраняет данные текущего класса в файл.  Если `append=True`, данные добавляются в конец файла. В противном случае файл перезаписывается.  Использует UTF-8 кодировку для совместимости с C++.
+- **load(filename)**: Загружает данные из указанного файла.  Очищает текущее хранилище данных перед загрузкой.  Поддерживает чтение UTF-8 кодировки.
 
 ## Пример использования
 
-```cpp
-#include <iostream>
-#include "ufo_array.h"
+```python
+from ufo_array_py import UFOArrayPy  # Assuming you've saved the Python code as ufo_array_py.py
 
-int main() {
-    UFOArray<std::string> ufo;
+ufo = UFOArrayPy("box")
 
-    std::string filename = "путь/к/файлу/имяфайла.ufo";
+filename = "data.ufo"
 
-    // Установка имени класса и добавление данных
-    ufo.setClassName("box").add("1", "Hello", "2", "World", "3", "Programm") // Ключ - Значение должны быть в равном количестве
-       
+# Добавление данных
+ufo.add("1", "Hello").add("2", "World").add("3", "Program")
 
-    // Сохранение данных в файл
-    ufo.save(filename);
+# Сохранение данных в файл
+ufo.save(filename)
 
-    // Загрузка данных из файла
-    ufo.load(filename);
 
-    //Открытие файла
-    ufo.open(filename);
+# Загрузка данных из файла
+ufo_loaded = UFOArrayPy("") # Create a dummy instance; classname will be loaded from the file.
+ufo_loaded.load(filename)
 
-    // Извлечение данных
-    auto allItems = ufo.getAllByClass("box");
-    auto firstItem = ufo.getFirstByClass("box");
-    auto lastItem = ufo.getLastByClass("box");
-    auto itemAtIndex = ufo.getByIndexAndClass("box", 1);
+# Вывод результатов (using the loaded object)
+print(ufo_loaded.to_string())
 
-    // Вывод результатов
-    std::cout << "Все элементы:\n";
-    for (const auto& [key, value] : allItems) {
-        std::cout << key << ": " << value << std::endl;
-    }
+# Accessing individual elements after loading:
+print(ufo_loaded.data["1"]) # Prints "Hello"
+print(ufo_loaded.class_name) # Prints "box"
 
-    std::cout << "Первый элемент: " << firstItem.first << ": " << firstItem.second << std::endl;
-    std::cout << "Последний элемент: " << lastItem.first << ": " << lastItem.second << std::endl;
-    std::cout << "Элемент под индексом 1: " << itemAtIndex.first << ": " << itemAtIndex.second << std::endl;
+# Example of creating and saving an empty object
+empty_ufo = UFOArrayPy("EmptyClass")
+empty_ufo.save("empty.ufo")
 
-    return 0;
-}
+empty_ufo_loaded = UFOArrayPy("")
+empty_ufo_loaded.load("empty.ufo")
+print(empty_ufo_loaded.to_string()) # Prints the correctly formatted empty object.
+
+
+
 ```
+
+
+##  Замечания о совместимости
+
+Python версия `UFOArrayPy` предназначена для взаимодействия с C++ версией `UFOArray`.  Формат сохраняемых файлов совместим между двумя реализациями.  Обратите внимание, что  Python версия использует `json.dumps` и `json.loads` для сериализации и десериализации данных.  C++ версия использует потоковый ввод/вывод.
+
+## Отличия от C++ версии
+
+* Отсутствуют методы `getAllByClass`, `getFirstByClass`, `getLastByClass`, `getByIndexAndClass` и `openFile`.  После загрузки данных из файла, вы можете  получать доступ к данным напрямую через словарь `ufo_array.data` как показано в примере.
+*  Тип данных не задаётся явно как шаблонный параметр. Python динамически типизирован, поэтому `value` в `add(key, value)` может быть любого типа. Однако, для совместимости с C++ версией, убедитесь, что типы данных, которые вы используете, могут быть представлены в C++ (например, числовые типы, строки).
